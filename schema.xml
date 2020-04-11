@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<!DOCTYPE mycat:schema SYSTEM "schema.dtd">
+<mycat:schema xmlns:mycat="http://io.mycat/">
+	<schema name="imooc_db" checkSQLschema="false" sqlMaxLimit="100" dataNode="custdb">
+       <table name="order_master" primaryKey="order_id" dataNode="ordb" />
+	   <table name="order_detail" primaryKey="order_detail_id" dataNode="ordb" />
+	   <table name="order_cart" primaryKey="cart_id" dataNode="ordb" />
+	   <table name="order_customer_addr" primaryKey="customer_addr_id" dataNode="ordb" />
+	   <table name="region_info" primaryKey="region_id" dataNode="ordb" />
+	   <table name="shipping_info" primaryKey="ship_id" dataNode="ordb" />
+	   <table name="warehouse_info" primaryKey="w_id" dataNode="ordb" />
+	   <table name="warehouse_proudct" primaryKey="wp_id" dataNode="ordb" />
+
+	   <table name="product_brand_infos" primaryKey="brand_id" dataNode="prodb" />
+	   <table name="product_category" primaryKey="category_id" dataNode="prodb" />
+	   <table name="product_comment" primaryKey="comment_id" dataNode="prodb" />
+	   <table name="product_info" primaryKey="product_id" dataNode="prodb" />
+	   <table name="product_supplier_info" primaryKey="supplier_id" dataNode="prodb" />
+	   <table name="product_pic_info" primaryKey="product_pic_id" dataNode="prodb" />
+    </schema>
+<!--order_master分表-->
+<!--
+   <schema name="order_db" checkSQLschema="false" sqlMaxLimit="100">
+  
+        <table name="order_master" primaryKey="order_id" dataNode="orderdb01,orderdb02,orderdb03,orderdb04" rule="order_master" autoIncrement="true"/>
+    </schema>
+-->
+<!--ER分表-->
+
+   <schema name="order_db" checkSQLschema="false" sqlMaxLimit="100">
+  
+        <table name="order_master" primaryKey="order_id" dataNode="orderdb01,orderdb02,orderdb03,orderdb04" rule="order_master" autoIncrement="true">
+          <childTable name="order_detail" primaryKey="order_detail_id" joinKey="order_id" parentKey="order_id" autoIncrement="true" />
+        </table>
+    </schema>
+
+    <dataNode name="custdb" dataHost="mysql1303" database="customer_db" />
+    <dataNode name="ordb" dataHost="mysql1304" database="order_db" />
+    <dataNode name="prodb" dataHost="mysql1305" database="product_db" />
+
+
+    <dataNode name="orderdb01" dataHost="mysql1303" database="orderdb01" />
+    <dataNode name="orderdb02" dataHost="mysql1303" database="orderdb02" />
+    <dataNode name="orderdb03" dataHost="mysql1304" database="orderdb03" />
+    <dataNode name="orderdb04" dataHost="mysql1304" database="orderdb04" />
+
+    <dataNode name="seq" dataHost="mysql1303" database="mycat" />
+
+    <dataHost name="mysql1303" maxCon="1000" minCon="10" balance="1"
+			  writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+		<heartbeat>select user()</heartbeat>
+		<writeHost host="10.102.13.3" url="10.102.13.3:3306" user="im_mycat" password="123456"/>
+	</dataHost>
+    <dataHost name="mysql1304" maxCon="1000" minCon="10" balance="1"
+			  writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+		<heartbeat>select user()</heartbeat>
+		<writeHost host="10.102.13.4" url="10.102.13.4:3306" user="im_mycat" password="123456"/>
+	</dataHost>
+    <dataHost name="mysql1305" maxCon="1000" minCon="10" balance="1"
+			  writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+		<heartbeat>select user()</heartbeat>
+		<writeHost host="10.102.13.5" url="10.102.13.5:3306" user="im_mycat" password="123456"/>
+	</dataHost>	
+
+</mycat:schema>

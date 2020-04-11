@@ -1,0 +1,59 @@
+[root@node1 haproxy]# yum install xinetd -y
+[root@node1 log]# vi /etc/xinetd.d/mycatchk
+service mycatchk
+{
+flags = REUSE
+socket_type = stream
+port = 48700
+wait = no
+user = root
+server =/usr/local/bin/mycat_status
+log_on_failure += USERID
+disable = no
+}
+###########################################
+#增加/usr/local/bin/mycat_status脚本
+#########################################
+#!/bin/bash
+#/usr/local/bin/mycat_status.sh
+# This script checks if a mycat server is healthy running on localhost. It will
+# return:
+#
+# "HTTP/1.x 200 OK\r" (if mycat is running smoothly)
+#
+# "HTTP/1.x 503 Internal Server Error\r" (else)
+mycat=`/usr/local/mycat/bin/mycat status |grep 'not running'| wc -l`
+if [ "$mycat" = "0" ];
+then
+    /bin/echo -en "HTTP/1.1 200 OK\r\n" 
+    /bin/echo -en "Content-Type: text/plain\r\n" 
+    /bin/echo -en "Connection: close\r\n" 
+    /bin/echo -en "Content-Length: 40\r\n" 
+    /bin/echo -en "\r\n" 
+    /bin/echo -en "MyCAT  Cluster Node is synced.\r\n" 
+    exit 0
+else
+    /bin/echo -en "HTTP/1.1 503 Service Unavailable\r\n" 
+    /bin/echo -en "Content-Type: text/plain\r\n" 
+    /bin/echo -en "Connection: close\r\n" 
+    /bin/echo -en "Content-Length: 44\r\n" 
+    /bin/echo -en "\r\n" 
+    /bin/echo -en "MyCAT Cluster Node is not synced.\r\n" 
+    exit 1
+fi
+#########################################################
+#在/etc/services中加入mycat_status服务
+######################################################
+[root@node1 bin]# vi /etc/services 
+mycatchk        48700/tcp               # mycat check
+#重启xinetd服务
+centos6:[root@node1 bin]# service xinetd restart
+centos7:[root@node1 bin]# systemctl restart xinetd
+#验证mycatchk服务是否启动成功
+[root@node1 bin]# netstat -nltp | grep 48700
+#在node1节点绑定VIP
+[root@node1 bin]# ifconfig eth0:1 10.102.13.248/24
+#启动haproxy
+[root@node1 xinetd.d]# haproxy -f /etc/haproxy/haproxy.cfg 
+#测试通过haproxy连接MyCAT
+[root@node3 ~]# mysql -uroot -p -h10.102.13.248 -P8096 

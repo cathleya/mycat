@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mycat:server SYSTEM "server.dtd">
+<mycat:server xmlns:mycat="http://io.mycat/">
+	<system>
+           <property name="serverPort">3306</property>
+	   <property name="managerPort">9066</property> 
+	    <property name="nonePasswordLogin">0</property> 
+	    <property name="bindIp">0.0.0.0</property>
+	    <property name="frontWriteQueueSize">2048</property>   
+  
+	    <property name="charset">utf8</property>
+	    <property name="txIsolation">2</property>
+	    <property name="processors">8</property> 
+	    <property name="idleTimeout">1800000</property>
+	    <property name="sqlExecuteTimeout">300</property>
+		<property name="useSqlStat">0</property> 
+		<property name="useGlobleTableCheck">0</property>  
+	    <property name="sequnceHandlerType">1</property>
+		<property name="defaultMaxLimit">100</property> 
+		<property name="maxPacketSize">104857600</property>
+	</system>
+	
+
+	<user name="root" defaultAccount="true">
+                <property name="usingDecrypt">1</property>
+                <property name="password">GO0bnFVWrAuFgr1JMuMZkvfDNyTpoiGU7n/Wlsa151CirHQnANVk3NzE3FErx8v6pAcO0ctX3xFecmSr+976QA==</property>
+		<property name="schemas">imooc_db,order_db</property>
+	</user>
+
+	<user name="user">
+		<property name="password">123456</property>
+		<property name="schemas">imooc_db</property>
+		<property name="readOnly">true</property>
+	</user>
+
+</mycat:server>
